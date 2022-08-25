@@ -7,17 +7,16 @@ void task2()
     enum class TaskState
     {
         INIT,
-        WAIT_PRESS,
-        WAIT_STABLE,
-        WAIT_RELEASE
+        tiempoespera, 
+        tiempo,
+        reiniciotiempo 
     };
     static TaskState taskState = TaskState::INIT;
     static uint8_t lastButtonPressed;
     static uint32_t initStableTime;
-
     const uint8_t boton1 = 32;
     const uint8_t boton2 = 13;
-    const uint32_t tiempo = 100; WAIT_STABLE
+    const uint32_t tiempo = 100; 
 
     switch (taskState)
     {
@@ -25,7 +24,7 @@ void task2()
     {
         pinMode(boton1, INPUT_PULLUP);
         pinMode(boton2, INPUT_PULLUP);
-        taskState = TaskState::WAIT_PRESS; 
+        taskState = TaskState::tiempoespera; 
         break;
     }
     case TaskState::tiempo:
@@ -57,9 +56,9 @@ void task2()
         }
         break;
     }
-    case TaskState::WAIT_RELEASE:{
+    case TaskState::reiniciotiempo:{
         if(digitalRead(lastButtonPressed) == HIGH){
-            taskState = TaskState::WAIT_PRESS;
+            taskState = TaskState::tiempoespera;
         }
         break;
     }
