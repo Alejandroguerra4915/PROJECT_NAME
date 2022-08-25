@@ -1,43 +1,46 @@
 #include <Arduino.h>
 #include "task1.h"
-
+#include "events.h"
 
 void task1()
 {
-    enum class Task1States
+    enum class TaskState
     {
         INIT,
-        WAIT_DATA
+        WAIT_COMMANDS
     };
-    static Task1States task1State = Task1States::INIT;
+    static TaskState taskState = TaskState::INIT;
 
-    switch (task1State)
+    switch (taskState)
     {
-    case Task1States::INIT:
+    case TaskState::INIT:
     {
         Serial.begin(115200);
-        task1State = Task1States::WAIT_DATA;
+        taskState = TaskState::WAIT_COMMANDS;
         break;
     }
-
-    case Task1States::WAIT_DATA:
+    case TaskState::WAIT_COMMANDS:
     {
-        // evento 1:
-        // Ha llegado al menos un dato por el puerto serial?
         if (Serial.available() > 0)
         {
-            Serial.read();
-            Serial.print("Hola computador\n");
+            int dataRx = Serial.read();
+            if (dataRx == 'u')
+            {
+                Serial.print("Boton1\n");
+                buttonEvt.trigger = true;
+                buttonEvt.whichButton = BUTTONS::Boton1;
+            }
+            if (dataRx == 'd')
+            {
+                Serial.print("Boton2\n");
+                buttonEvt.trigger = true;
+                buttonEvt.whichButton = BUTTONS::Boton2;
+            }
         }
         break;
     }
-
     default:
     {
-        break;
     }
     }
-}
-
-    
 }
