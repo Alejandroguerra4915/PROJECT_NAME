@@ -7,7 +7,8 @@ static bool compareKeys(BUTTONS *pSecret, BUTTONS *pKey)
     bool correct = true;
     for (uint8_t i = 0; i < 5; i++)
     {
-        if (pSecret[i] != pKey[i]){
+        if (pSecret[i] != pKey[i])
+        {
             correct = false;
             break;
         }
@@ -28,7 +29,7 @@ void task3()
         LENTO,
         MEDIO,
         RAPIDO,
-    
+
     };
     static TaskStates taskState = TaskStates::INIT;
     const uint8_t led = 25;
@@ -36,11 +37,10 @@ void task3()
     static constexpr uint32_t LentoINTERVAL = 1000;
     static constexpr uint32_t MedioINTERVAL = 500;
     static constexpr uint32_t RapidoINTERVAL = 125;
-    
 
     static BUTTONS SecretCodigoRapido[5] = {BUTTONS::Boton1, BUTTONS::Boton1,
-                                                    BUTTONS::Boton2, BUTTONS::Boton2,
-                                                    BUTTONS::Boton1};
+                                            BUTTONS::Boton2, BUTTONS::Boton2,
+                                            BUTTONS::Boton1};
 
     static BUTTONS RapidoKey[5] = {BUTTONS::NONE};
 
@@ -63,8 +63,8 @@ void task3()
     case TaskStates::LENTO:
     {
         uint32_t currentTime = millis();
-        if ((currentTime - lasTime) >= LentoINTERVAL){
-
+        if ((currentTime - lasTime) >= LentoINTERVAL)
+        {
             lasTime = currentTime;
             digitalWrite(led, ledState);
             ledState = !ledState;
@@ -73,15 +73,16 @@ void task3()
                 buttonEvt.trigger = false;
                 if (buttonEvt.whichButton == BUTTONS::Boton1)
                 {
+                    digitalWrite(led, ledState);
+                    ledState = false;
                     taskState = TaskStates::APAGADO;
                 }
                 else if (buttonEvt.whichButton == BUTTONS::Boton2)
                 {
-                    
+
                     taskState = TaskStates::MEDIO;
                 }
-
-            }   
+            }
         }
         break;
     }
@@ -89,7 +90,8 @@ void task3()
     case TaskStates::MEDIO:
     {
         uint32_t currentTime = millis();
-        if ((currentTime - lasTime) >= MedioINTERVAL){
+        if ((currentTime - lasTime) >= MedioINTERVAL)
+        {
 
             lasTime = currentTime;
             digitalWrite(led, ledState);
@@ -99,17 +101,17 @@ void task3()
                 buttonEvt.trigger = false;
                 if (buttonEvt.whichButton == BUTTONS::Boton1)
                 {
+                    digitalWrite(led, ledState);
+                    ledState = true;
                     taskState = TaskStates::ENCENDIDO;
                 }
                 else if (buttonEvt.whichButton == BUTTONS::Boton2)
                 {
                     taskState = TaskStates::LENTO;
                 }
-
             }
         }
         break;
-        
     }
 
     case TaskStates::RAPIDO:
@@ -121,51 +123,57 @@ void task3()
             lasTime = currentTime;
             digitalWrite(led, ledState);
             ledState = !ledState;
-            
         }
-        
+
         if (buttonEvt.trigger == true)
         {
-                buttonEvt.trigger = false;
-                RapidoKey[key] = buttonEvt.whichButton;
-                key++;
+            buttonEvt.trigger = false;
+            RapidoKey[key] = buttonEvt.whichButton;
+            key++;
 
-                if (key == 5)
+            if (key == 5)
+            {
+                key = 0;
+                if (compareKeys(SecretCodigoRapido, RapidoKey) == true)
                 {
-                    key = 0;
-                    if (compareKeys(SecretCodigoRapido, RapidoKey) == true)
+                    if (lastStateON == true)
                     {
-                        if (lastStateON == true)
-                        {
-                            taskState = TaskStates::ENCENDIDO;
-                        }
-                        else if (lastStateOFF == true)
-                        {
-                            taskState = TaskStates::APAGADO;
-                        }
+                        digitalWrite(led, ledState);
+                        ledState = true;
+                        taskState = TaskStates::ENCENDIDO;
                     }
-                    else
+                    else if (lastStateOFF == true)
                     {
-                        Serial.print("wrong!!!!");
+                        digitalWrite(led, ledState);
+
+                        ledState = false;
+                        taskState = TaskStates::APAGADO;
                     }
                 }
-
+                else
+                {
+                    Serial.print("profe pongame 5");
+                }
+            }
         }
-    
-            break;      
+
+        break;
     }
 
     case TaskStates::APAGADO:
     {
-        digitalWrite(led, ledState);
-
-        ledState = false;
 
         if (buttonEvt.trigger == true)
         {
             buttonEvt.trigger = false;
             if (buttonEvt.whichButton == BUTTONS::Boton1)
             {
+
+                // LED ON 
+                pinMode(led, OUTPUT);
+                digitalWrite(led, LOW);
+                digitalWrite(led, ledState);
+                ledState = true;
                 taskState = TaskStates::LENTO;
             }
             else if (buttonEvt.whichButton == BUTTONS::Boton2)
@@ -176,13 +184,10 @@ void task3()
             }
         }
         break;
-        
     }
 
     case TaskStates::ENCENDIDO:
     {
-        digitalWrite(led, ledState);
-        ledState = true;
 
         if (buttonEvt.trigger == true)
         {
@@ -199,10 +204,8 @@ void task3()
             }
         }
         break;
-        
     }
 
-    
     default:
     {
         break;
