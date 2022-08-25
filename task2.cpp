@@ -7,58 +7,59 @@ void task2()
     enum class TaskState
     {
         INIT,
-        tiempoespera, 
-        tiempo,
-        reiniciotiempo 
+        WAIT_PRESS,
+        WAIT_STABLE,
+        WAIT_RELEASE
     };
     static TaskState taskState = TaskState::INIT;
     static uint8_t lastButtonPressed;
     static uint32_t initStableTime;
-    const uint8_t boton1 = 32;
-    const uint8_t boton2 = 13;
-    const uint32_t tiempo = 100; 
+
+    const uint8_t Boton1_PIN = 32;
+    const uint8_t Boton2_PIN = 13;
+    const uint32_t STABLE_TIME = 100;
 
     switch (taskState)
     {
     case TaskState::INIT:
     {
-        pinMode(boton1, INPUT_PULLUP);
-        pinMode(boton2, INPUT_PULLUP);
-        taskState = TaskState::tiempoespera; 
+        pinMode(Boton1_PIN, INPUT_PULLUP);
+        pinMode(Boton2_PIN, INPUT_PULLUP);
+        taskState = TaskState::WAIT_PRESS; 
         break;
     }
-    case TaskState::tiempo:
+    case TaskState::WAIT_PRESS:
     {
-        if(digitalRead(boton1) == LOW){
-            lastButtonPressed = boton1;
+        if(digitalRead(Boton1_PIN) == LOW){
+            lastButtonPressed = Boton1_PIN;
             initStableTime = millis();
-            taskState = TaskState::tiempo;
+            taskState = TaskState::WAIT_STABLE;
         }
-        if(digitalRead(boton2) == LOW){
-            lastButtonPressed = boton2;
+        if(digitalRead(Boton2_PIN) == LOW){
+            lastButtonPressed = Boton2_PIN;
             initStableTime = millis();
-            taskState = TaskState::tiempo;
+            taskState = TaskState::WAIT_STABLE;
         }
 
         break;
     }
-    case TaskState::tiempo:
+    case TaskState::WAIT_STABLE:
     {
         if(digitalRead(lastButtonPressed) != LOW){
             taskState = TaskState::WAIT_PRESS;
         }
-        else if ( (millis() - initStableTime) > tiempo){
-            if(lastButtonPressed == boton1) buttonEvt.whichButton = BUTTONS::Boton1;
-            else if(lastButtonPressed == boton2) buttonEvt.whichButton = BUTTONS::Boton2;
+        else if ( (millis() - initStableTime) > STABLE_TIME){
+            if(lastButtonPressed == Boton1_PIN) buttonEvt.whichButton = BUTTONS::Boton1;
+            else if(lastButtonPressed == Boton2_PIN) buttonEvt.whichButton = BUTTONS::Boton2;
             buttonEvt.trigger = true;
-            //printf("Button pressed: %d\n", lastButtonPressed);
+            printf("Button pressed: %d\n", lastButtonPressed);
             taskState = TaskState::WAIT_RELEASE;
         }
         break;
     }
-    case TaskState::reiniciotiempo:{
+    case TaskState::WAIT_RELEASE:{
         if(digitalRead(lastButtonPressed) == HIGH){
-            taskState = TaskState::tiempoespera;
+            taskState = TaskState::WAIT_PRESS;
         }
         break;
     }
