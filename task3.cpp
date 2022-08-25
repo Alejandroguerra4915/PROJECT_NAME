@@ -31,7 +31,7 @@ void task3()
     
     };
     static TaskStates taskState = TaskStates::INIT;
-    const uint8_t led = 14;
+    const uint8_t led = 25;
     static uint32_t lasTime;
     static constexpr uint32_t LentoINTERVAL = 1000;
     static constexpr uint32_t MedioINTERVAL = 500;
